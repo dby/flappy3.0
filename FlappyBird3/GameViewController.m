@@ -23,7 +23,7 @@
     skView.ignoresSiblingOrder = YES;
     
     // Create and configure the scene.
-    GameScene *scene = [GameScene nodeWithFileNamed:@"GameScene"];
+    GameScene *scene = [[GameScene alloc] initWithSize:CGSizeMake(self.view.frame.size.width, self.view.frame.size.height)];
     scene.scaleMode = SKSceneScaleModeAspectFill;
     
     // Present the scene.
@@ -42,12 +42,6 @@
     } else {
         return UIInterfaceOrientationMaskAll;
     }
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Release any cached data, images, etc that aren't in use.
 }
 
 - (BOOL)prefersStatusBarHidden {
