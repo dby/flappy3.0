@@ -7,6 +7,7 @@
 //
 
 #import "GameScene.h"
+#import "RestartView.h"
 
 static const uint32_t heroCategory      = 0x1 << 0;
 static const uint32_t wallCategory      = 0x1 << 1;
@@ -14,7 +15,7 @@ static const uint32_t holeCategory      = 0x1 << 2;
 static const uint32_t groundCategory    = 0x1 << 3;
 static const uint32_t edgeCategory      = 0x1 << 4;
 
-@interface GameScene () <SKPhysicsContactDelegate>
+@interface GameScene () <SKPhysicsContactDelegate, RestartViewDelegate>
 
 @property (nonatomic, strong) SKSpriteNode *hero;
 @property (nonatomic, strong) SKSpriteNode *ground;
@@ -222,6 +223,40 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     [self enumerateChildNodesWithName:NODENAME_HOLE usingBlock:^(SKNode * _Nonnull node, BOOL * _Nonnull stop) {
         [node removeActionForKey:ACTIONKEY_MOVEWALL];
     }];
+    
+    RestartView *restartView = [RestartView getIngstanceWithSize:self.size];
+    restartView.delegate = self;
+    [restartView showInScene:self];
+}
+
+- (void)restart
+{
+    // label
+    self.labelNode.text = @"0";
+    
+    // remove all wall and hole
+    [self enumerateChildNodesWithName:NODENAME_HOLE usingBlock:^(SKNode * _Nonnull node, BOOL * _Nonnull stop) {
+        [node removeFromParent];
+    }];
+    [self enumerateChildNodesWithName:NODENAME_WALL usingBlock:^(SKNode * _Nonnull node, BOOL * _Nonnull stop) {
+        [node removeFromParent];
+    }];
+    
+    // reset hero
+    [_hero removeFromParent];
+    self.hero = nil;
+    [self addHeroNode];
+    
+    // add dust
+    [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[
+                                                                       [SKAction performSelector:@selector(addDust) onTarget:self],
+                                                                       [SKAction waitForDuration:0.3f],
+                                                                       ]
+                                                   ]] withKey:ACTIONKEY_ADDDUST];
+    
+    // flag
+    self.isGameOver = NO;
+    self.isGameStart = NO;
 }
 
 - (void)playSoundWithName:(NSString *)fileName
@@ -295,6 +330,13 @@ static const uint32_t edgeCategory      = 0x1 << 4;
         [self playSoundWithName:@"sfx_hit.caf"];
         [self gameOver];
     }
+}
+
+#pragma mark - RestartView delegate
+-(void)restartView:(RestartView *)restartView didPressRestartButton:(SKSpriteNode *)restartButton
+{
+    [restartView dismiss];
+    [self restart];
 }
 
 @end
