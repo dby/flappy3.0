@@ -24,6 +24,12 @@ static const uint32_t edgeCategory      = 0x1 << 4;
 @property (nonatomic, strong) SKAction *moveWallAction;
 @property (nonatomic, strong) SKAction *moveHeadAction;
 
+@property (nonatomic, strong) SKTexture *groundTexture;
+@property (nonatomic, strong) SKTexture *skyTexture;
+@property (nonatomic, strong) SKTexture *pipeUpTexture;
+@property (nonatomic, strong) SKTexture *pipeDownTexture;
+@property (nonatomic, strong) SKTexture *birdTexture;
+
 @property BOOL isGameOver;
 @property BOOL isGameStart;
 
@@ -39,6 +45,8 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
     self.physicsBody.categoryBitMask = edgeCategory;
     self.physicsWorld.contactDelegate = self;
+    
+    [self initTexture];
     
     self.moveWallAction = [SKAction moveToX:-WALL_WIDTH duration:TIMEINTERVAL_MOVEWALL];
     
@@ -61,6 +69,25 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     
 }
 
+#pragma mark - Texture
+
+- (void)initTexture
+{
+    self.groundTexture = [SKTexture textureWithImageNamed:@"land"];
+    self.groundTexture.filteringMode = SKTextureFilteringNearest;
+    
+    self.birdTexture = [SKTexture textureWithImageNamed:@"bird-02"];
+    self.birdTexture.filteringMode = SKTextureFilteringNearest;
+    
+    self.pipeDownTexture = [SKTexture textureWithImageNamed:@"PipeDown"];
+    self.pipeDownTexture.filteringMode = SKTextureFilteringNearest;
+    self.pipeUpTexture = [SKTexture textureWithImageNamed:@"PipeUp"];
+    self.pipeUpTexture.filteringMode = SKTextureFilteringNearest;
+    
+    self.skyTexture = [SKTexture textureWithImageNamed:@"sky"];
+    self.skyTexture.filteringMode = SKTextureFilteringNearest;
+}
+
 #pragma mark - 添加SKSpriteNode
 
 - (void)addResultLabelNode
@@ -77,7 +104,8 @@ static const uint32_t edgeCategory      = 0x1 << 4;
 
 - (void)addHeroNode
 {
-    self.hero = [SKSpriteNode spriteNodeWithColor:COLOR_HERO size:HERO_SIZE];
+    //self.hero = [SKSpriteNode spriteNodeWithColor:COLOR_HERO size:HERO_SIZE];
+    _hero = [SKSpriteNode spriteNodeWithTexture:_birdTexture size:HERO_SIZE];
     _hero.anchorPoint = CGPointMake(0.5, 0.5);
     _hero.position = CGPointMake(self.frame.size.width / 3, CGRectGetMidY(self.frame));
     _hero.name = NODENAME_HERO;
@@ -98,7 +126,8 @@ static const uint32_t edgeCategory      = 0x1 << 4;
 
 - (void)addGroundNode
 {
-    self.ground = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(self.frame.size.width, GROUND_HEIGHT)];
+    //self.ground = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(self.frame.size.width, GROUND_HEIGHT)];
+    self.ground = [SKSpriteNode spriteNodeWithTexture:_groundTexture size:CGSizeMake(self.frame.size.width, GROUND_HEIGHT)];
     _ground.anchorPoint = CGPointMake(0, 0);
     _ground.position = CGPointMake(0, 0);
     _ground.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:_ground.size center:CGPointMake(_ground.size.width / 2.0f, _ground.size.height / 2.0f)];
@@ -120,7 +149,8 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     // 上部分 矩形
     CGFloat upHeight = holePosition * HERO_SIZE.height;
     if (upHeight > 0) {
-        SKSpriteNode *upWall = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(WALL_WIDTH, upHeight)];
+        //SKSpriteNode *upWall = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(WALL_WIDTH, upHeight)];
+        SKSpriteNode *upWall = [SKSpriteNode spriteNodeWithTexture:_pipeDownTexture size:CGSizeMake(WALL_WIDTH, upHeight)];
         upWall.anchorPoint = CGPointMake(0, 0);
         upWall.position = CGPointMake(x, self.frame.size.height - upHeight);
         upWall.name = NODENAME_WALL;
@@ -138,7 +168,8 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     // 下部分 矩形
     CGFloat downHeight = spaceHeigh - upHeight - holeLength;
     if (downHeight > 0) {
-        SKSpriteNode *downWall = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(WALL_WIDTH, downHeight)];
+        //SKSpriteNode *downWall = [SKSpriteNode spriteNodeWithColor:COLOR_WALL size:CGSizeMake(WALL_WIDTH, downHeight)];
+        SKSpriteNode *downWall = [SKSpriteNode spriteNodeWithTexture:_pipeUpTexture size:CGSizeMake(WALL_WIDTH, downHeight)];
         downWall.anchorPoint = CGPointMake(0, 0);
         downWall.position = CGPointMake(x, GROUND_HEIGHT);
         downWall.name = NODENAME_WALL;
