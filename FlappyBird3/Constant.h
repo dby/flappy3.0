@@ -17,6 +17,7 @@
 #define NODENAME_WALL @"wall"
 #define NODENAME_HOLE @"hole"
 #define NODENAME_DUST @"dust"
+#define NODENAME_SKY @"sky"
 
 #define ACTIONKEY_ADDWALL @"addwall"
 #define ACTIONKEY_MOVEWALL @"movewall"
@@ -38,6 +39,7 @@
 #define COLOR_BG    [UIColor whiteColor]
 #define COLOR_WALL  [SKColor colorWithRed:34/255. green:166/255. blue:159/255. alpha:1]
 #define COLOR_LABEL [SKColor colorWithRed:17/255. green:39/255. blue:57/255. alpha:1]
+#define COLOR_SKY   [SKColor colorWithRed:81.0/255. green:192.0/255. blue:201/255. alpha:1]
 
 #define DEVICE_BOUNDS [[UIScreen mainScreen] applicationFrame]
 #define DEVICE_SIZE [[UIScreen mainScreen] applicationFrame].size

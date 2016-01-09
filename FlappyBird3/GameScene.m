@@ -41,7 +41,7 @@ static const uint32_t edgeCategory      = 0x1 << 4;
 {
     [super initalize];
     
-    self.backgroundColor = COLOR_BG;
+    self.backgroundColor = COLOR_SKY;
     self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
     self.physicsBody.categoryBitMask = edgeCategory;
     self.physicsWorld.contactDelegate = self;
@@ -56,10 +56,10 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     downHeadAction.timingMode = SKActionTimingEaseOut;
     self.moveHeadAction = [SKAction sequence:@[upHeadAction, downHeadAction]];
     
-    
     [self addGroundNode];
     [self addHeroNode];
     [self addResultLabelNode];
+    [self addSky];
     
     [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[
                                                                        [SKAction performSelector:@selector(addDust) onTarget:self],
@@ -213,6 +213,31 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     [self addChild:dustNode];
 }
 
+- (void)addSky
+{
+    
+    SKAction *moveSkySprite = [SKAction moveByX:(-_skyTexture.size.width * 2.0) y: 0 duration:(0.01 * _skyTexture.size.width * 2.0)];
+    SKAction *resetSkySprite = [SKAction moveByX:(_skyTexture.size.width * 2.0) y: 0 duration: 0.0];
+    SKAction *moveSkySpritesForever = [SKAction repeatActionForever:[ SKAction sequence:@[moveSkySprite,
+                                                                                         resetSkySprite
+                                                                                          ]
+                                      ]];
+    int i = 0;
+    for (i = 0; i < 2.0 + self.frame.size.width/(_skyTexture.size.width*2.0); i++) {
+        
+        NSLog(@"i: %d", i);
+        SKSpriteNode *skySpriteNode = [SKSpriteNode spriteNodeWithTexture:self.skyTexture];
+        skySpriteNode.name = NODENAME_SKY;
+        [skySpriteNode setScale:2.0];
+        [skySpriteNode setZPosition:-20];
+        skySpriteNode.position = CGPointMake(
+                                             i*skySpriteNode.size.width,
+                                             _groundTexture.size.height
+                                             );
+        [skySpriteNode runAction:moveSkySpritesForever];
+        [self addChild:skySpriteNode];
+    }
+}
 #pragma mark - method
 
 - (SKAction *)getFlyAction
@@ -245,6 +270,21 @@ static const uint32_t edgeCategory      = 0x1 << 4;
 
 - (void)gameOver
 {
+    
+    // 背景闪烁
+    [self runAction:[SKAction sequence: @[
+                                          [SKAction repeatAction:[SKAction sequence:@[
+                                                                                      [SKAction runBlock:^{ self.backgroundColor = [SKColor redColor];}],
+                                                                                      [SKAction waitForDuration:0.1],
+                                                                                      [SKAction runBlock:^{ self.backgroundColor = COLOR_SKY;}],
+                                                                                      [SKAction waitForDuration:0.1],
+                                                                                      ]] count:4]
+                                          
+                                          ]
+                     ]
+     ];
+    
+    
     self.isGameOver = YES;
     [_hero removeActionForKey:ACTIONKEY_MOVEHEAD];
     [self removeActionForKey:ACTIONKEY_ADDWALL];
@@ -253,6 +293,9 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     }];
     [self enumerateChildNodesWithName:NODENAME_HOLE usingBlock:^(SKNode * _Nonnull node, BOOL * _Nonnull stop) {
         [node removeActionForKey:ACTIONKEY_MOVEWALL];
+    }];
+    [self enumerateChildNodesWithName:NODENAME_SKY usingBlock:^(SKNode * _Nonnull node, BOOL * _Nonnull stop) {
+        [node removeFromParent];
     }];
     
     RestartView *restartView = [RestartView getIngstanceWithSize:self.size];
@@ -277,7 +320,7 @@ static const uint32_t edgeCategory      = 0x1 << 4;
     [_hero removeFromParent];
     self.hero = nil;
     [self addHeroNode];
-    
+    [self addSky];
     // add dust
     [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[
                                                                        [SKAction performSelector:@selector(addDust) onTarget:self],
